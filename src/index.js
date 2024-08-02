@@ -1,6 +1,26 @@
-//Feature 1 -- Display current time ("Tuesday 16:00")
-function displayCurrent() {
-  let currentTime = new Date();
+function search(event) {
+  event.preventDefault();
+  let searchInputElement = document.querySelector("#search-input");
+  let city = searchInputElement.value;
+
+  let apiKey = "e49t4e467d35faocb8ec3a1644a604fa";
+  let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=imperial`;
+
+  axios.get(apiUrl).then(displayWeatherDetails);
+}
+
+function formatDate(date) {
+  let minutes = date.getMinutes();
+  let hours = date.getHours();
+  let day = date.getDay();
+
+  if (minutes < 10) {
+    minutes = `0${minutes}`;
+  }
+
+  if (hours < 10) {
+    hours = `0${hours}`;
+  }
 
   let days = [
     "Sunday",
@@ -11,31 +31,39 @@ function displayCurrent() {
     "Friday",
     "Saturday",
   ];
-  let day = days[currentTime.getDay()];
 
-  let hour = currentTime.getHours();
-  let minute = currentTime.getMinutes();
-
-  let displayCurrentInfo = document.querySelector(".currentTimeInfo");
-
-  displayCurrentInfo.innerHTML = `${day} ${hour}:${minute}`;
+  let formattedDay = days[day];
+  return `${formattedDay} ${hours}:${minutes}`;
 }
 
-let displayCurrentTime = document.querySelector(".current-weather");
+let searchForm = document.querySelector("#search-form");
+searchForm.addEventListener("submit", search);
 
-//Feature 2 -- Add a search engine: a search bar with a button.
-//When searching for a city, display the city name on the page after the user submits the form.
+let currentDateELement = document.querySelector("#current-date");
+let currentDate = new Date();
 
-function searchNewCity(event) {
-  event.preventDefault();
-  let cityInput = document.querySelector(".search-input");
-  if (cityInput.value) {
-    let currentCity = document.querySelector(".current-city");
-    currentCity.innerHTML = `${cityInput.value}`;
-  }
+currentDateELement.innerHTML = formatDate(currentDate);
 
-  displayCurrent();
+function displayWeatherDetails(response) {
+  //displays current temperature for city
+  let tempElement = document.querySelector("#current-temperature");
+  let currT = Math.round(response.data.temperature.current);
+  let cityElement = document.querySelector("#current-city");
+  cityElement.innerHTML = response.data.city;
+  tempElement.innerHTML = currT;
+
+  //displays current weather description for city
+  let descriptionElement = document.querySelector("#weather-desc");
+  let currentDesc = response.data.condition.description;
+  descriptionElement.innerHTML = currentDesc;
+
+  //displays current humidity for city
+  let humidityElement = document.querySelector("#humidity-value");
+  let currHumidity = response.data.temperature.humidity;
+  humidityElement.innerHTML = currHumidity;
+
+  //displays current wind speed for city
+  let windElement = document.querySelector("#wind-value");
+  let currWind = response.data.wind.speed;
+  windElement.innerHTML = currWind;
 }
-
-let searchCity = document.querySelector("#search-city");
-searchCity.addEventListener("submit", searchNewCity);
